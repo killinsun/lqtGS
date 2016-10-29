@@ -1,0 +1,37 @@
+---
+- name: create instance 
+  os_server: 
+    cloud: '{{ projectName }}'
+    state: absent
+    name: quest1
+
+- name: Delete a router
+  os_router: 
+    cloud: '{{ projectName }}'
+    name: linque_router
+    state: absent
+
+- name: Delete a subnet 
+  os_subnet: 
+    cloud: '{{ projectName }}'
+    state: absent
+    name: linque_subnet
+
+- name: Delete a network
+  os_network: 
+    cloud: '{{ projectName }}'
+    state: absent
+    name: linque_net
+
+- name: Delete a user
+  os_user:
+    cloud: ansible
+    state: absent
+    name: '{{ userName }}'
+
+- name: Delete a Project
+  os_project:
+    cloud: ansible
+    state: absent
+    name: '{{ projectName }}' 
+

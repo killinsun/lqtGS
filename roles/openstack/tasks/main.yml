@@ -1,0 +1,66 @@
+---
+- name: create network
+  os_network: 
+    cloud: ansible 
+    state: present 
+    name: adoc-net
+
+- name: create subnet 
+  os_subnet: 
+    cloud: ansible 
+    name: adoc-subnet 
+    network_name: adoc-net 
+    cidr: 10.0.0.0/24 
+    dns_nameservers: 8.8.8.8 
+    state: present 
+
+- name: create router 
+  os_router: 
+    cloud: ansible 
+    name: adoc-router 
+    state: present 
+    network: public
+    interfaces: 
+      - adoc-subnet 
+
+- name: create security group 
+  os_security_group: 
+    cloud: ansible 
+    state: present 
+    name: adoc-sg 
+
+- name: add security group rule 
+  os_security_group_rule: 
+    cloud: ansible 
+    state: present 
+    security_group: adoc-sg 
+    protocol: tcp 
+    port_range_min: 22 
+    port_range_max: 22 
+    remote_ip_prefix: 0.0.0.0/0 
+
+- name: create keypair 
+  os_keypair: 
+    cloud: ansible 
+    state: present 
+    name: adoc-key 
+  register: keypair_info 
+
+- name: create private key 
+  copy: 
+    content: "{{ keypair_info['key']['private_key'] }}" 
+    dest: ./adoc-key-private.pem 
+    mode: 0600 
+  when: keypair_info.changed 
+
+- name: create instance 
+  os_server: 
+    cloud: ansible 
+    state: present 
+    name: adoc-instance 
+    image: 46d2ff3b-ae9f-491c-b57c-aa6f087c6cb9
+    flavor: t1.linuxDefault
+    key_name: adoc-key 
+    security_groups: adoc-sg 
+    network: adoc-net 
+    floating_ip_pools: public
